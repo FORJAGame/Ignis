@@ -1,5 +1,7 @@
 import os
 import json
+import customtkinter as ctk
+from tkinter import messagebox
 
 TeamsHistory = "teams.json"
 
@@ -60,8 +62,6 @@ def add_points(teams):
             launch_challenge(teams)
         else:
             print("\nOpção inválida")
-            
-
 
 def edit_points(teams):
     clear()
@@ -108,71 +108,17 @@ def launch_challenge(teams):
     else:
         print("Equipe penalizada!")
 
+#Criação da Interface------------------------------------------------------------------
 
-    
-#Código principal----------------------------------------------------------
+ctk.set_appearance_mode("dark")
+ctk.set_default_color_theme("blue")
 
-teams = load_teams()
+app = ctk.CTk()
+app.title("LevelUp!Jam!")
+app.geometry("500x600")
 
-clear()
+# (botões, labels, etc.)
+# label = ctk.CTkLabel(app, text="Olá!")
+# label.pack()
 
-print("=== LevelUp!Jam! ===")
-print("\nO que deseja fazer?\n \n1.Lançar Desafios! \n2.Pontuar Equipes")
-
-menuAnswear = input("\nDigite sua resposta: ")
-
-if menuAnswear == '1':
-
-    if len(teams) == 0:
-        answear = input("\nNenhuma equipe registrada, deseja registrar equipes? (S/N): ")
-        if answear == 'S' or answear == 's':
-            print("\nVamos registrar nossas equipes!")
-            
-            while True:
-                name = input("Digite o nome da equipe (ou 'sair' para terminar): ")
-                if name.lower() == 'sair':
-                    break
-                newTeam = create_teams(name)
-                teams.append(newTeam)
-            
-            save_teams(teams)
-            print("Equipes registradas com sucesso!")
-            add_points(teams)
-        else:
-            print("Até mais!")
-    else:
-        launch_challenge(teams)
-
-elif menuAnswear == '2':
-
-
-    if len(teams) == 0:
-        answear = input("\nNenhuma equipe registrada, deseja registrar equipes? (S/N): ")
-        if answear == 'S' or answear == 's':
-            print("\nVamos registrar nossas equipes!")
-            
-            while True:
-                name = input("Digite o nome da equipe (ou 'sair' para terminar): ")
-                if name.lower() == 'sair':
-                    break
-                newTeam = create_teams(name)
-                teams.append(newTeam)
-            
-            save_teams(teams)
-            print("Equipes registradas com sucesso!")
-            add_points(teams)
-        else:
-            print("Até mais!")
-    else:
-        print("\nEquipes registradas:")
-        for i, team in enumerate(teams, start=1):
-            print(f"  {i}. {team['nome']} - {team['pontos']} pontos")
-        
-        answear = input("\nDeseja continuar a pontuação dessas equipes? (S/N): ")
-        if answear == 'S' or answear == 's':
-            print("Continuando pontuação!")
-            add_points(teams)
-        else:
-            print("Até mais!")
-
-    
+app.mainloop()
