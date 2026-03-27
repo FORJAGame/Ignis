@@ -2,6 +2,8 @@ import os
 import json
 import customtkinter as ctk
 from tkinter import messagebox
+from tkinter import font as tkfont
+import tkinter as tk
 
 TeamsHistory = "teams.json"
 
@@ -110,15 +112,31 @@ def launch_challenge(teams):
 
 #Criação da Interface------------------------------------------------------------------
 
+from ctypes import windll
+windll.gdi32.AddFontResourceW("PressStart2P-Regular.ttf")
+
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
 
 app = ctk.CTk()
-app.title("LevelUp!Jam!")
-app.geometry("500x600")
+app.title("Ignis")
+app.geometry("400x400")
 
-# (botões, labels, etc.)
-# label = ctk.CTkLabel(app, text="Olá!")
-# label.pack()
+# Título
+ctk.CTkLabel(
+    app,
+    text="IGNIS",
+    font=("Press Start 2P", 32)
+).pack(pady=(60, 5))
+
+ctk.CTkLabel(
+    app,
+    text="FORJA",
+    font=("Press Start 2P", 24)
+).pack(pady=(10, 5))
+
+# Botões
+ctk.CTkButton(app, text="⚙️ Painel Admin", height=50, width=250).pack(pady=8)
+ctk.CTkButton(app, text="🏆 Tela do Público", height=50, width=250).pack(pady=8)
 
 app.mainloop()
