@@ -145,7 +145,32 @@ ctk.CTkLabel(
 
 
 # Botões
-ctk.CTkButton(app, text="⚙️ Painel Admin", height=50, width=250).pack(pady=8)
-ctk.CTkButton(app, text="🏆 Tela do Público", height=50, width=250).pack(pady=8)
+ctk.CTkButton(
+    app,
+    text="Painel do Admin",
+    font=("Press Start 2P", 14),
+    height=50,
+    width=300,
+    fg_color="transparent",
+    border_width=2,
+    border_color="#ff0000",
+    text_color="#ff0000",
+    hover_color="#ffcccc",
+    corner_radius=0
+).pack(pady=8)
+
+ctk.CTkButton(
+    app,
+    text="Painel do Ranking",
+    font=("Press Start 2P", 14),
+    height=50,
+    width=300,
+    fg_color="transparent",
+    border_width=2,
+    border_color="#ff0000",
+    text_color="#ff0000",
+    hover_color="#ffcccc",
+    corner_radius=0
+).pack(pady=8)
 
 app.mainloop()
