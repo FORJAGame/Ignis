@@ -4,6 +4,7 @@ import customtkinter as ctk
 from tkinter import messagebox
 from tkinter import font as tkfont
 import tkinter as tk
+from PIL import Image
 
 
 TeamsHistory = "teams.json"
@@ -125,17 +126,23 @@ app.geometry("400x400")
 app.configure(fg_color="#e6e6e6")
 
 # Título
+logo_image = ctk.CTkImage(
+    light_image=Image.open("img/pngLogo.png"),
+    dark_image=Image.open("img/pngLogo.png"),
+    size=(400, 200)  # ajusta o tamanho como quiser
+)
 ctk.CTkLabel(
     app,
-    text="IGNIS",
-    font=("Press Start 2P", 32),
+    image=logo_image,
+    text=""
+).pack(pady=(40, 10))
+ctk.CTkLabel(
+    app,
+    text="GameJam Manegment",
+    font=("Press Start 2P", 20),
     text_color="#ff0000"
-).pack(pady=(60, 5))
-ctk.CTkLabel(
-    app,
-    text="FORJA",
-    font=("Press Start 2P", 24)
-).pack(pady=(10, 5))
+).pack(pady=(20, 5))
+
 
 # Botões
 ctk.CTkButton(app, text="⚙️ Painel Admin", height=50, width=250).pack(pady=8)
