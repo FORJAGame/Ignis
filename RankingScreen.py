@@ -2,10 +2,8 @@ import os
 import json
 import customtkinter as ctk
 from tkinter import messagebox
-from tkinter import font as tkfont
-import tkinter as tk
 from PIL import Image
-
+from ctypes import windll
 
 TeamsHistory = "teams.json"
 
@@ -13,6 +11,7 @@ TeamsHistory = "teams.json"
 
 def clear():
     os.system('cls')
+
 def load_teams():
     if os.path.exists(TeamsHistory):
         with open(TeamsHistory, "r") as f:
@@ -26,151 +25,296 @@ def save_teams(teams):
 def create_teams(names):
     return {"nome": names, "pontos": 0}
 
-def add_points(teams):
-    while True:
-        clear()
-        print("=== PONTUAÇÃO ===")
-        for i, team in enumerate(teams, start=1):
-            print(f"  {i}. {team['nome']} - {team['pontos']} pontos")
-        
-        print("\nO que deseja fazer?")
-        print("  1. Adicionar pontos")
-        print("  2. Encerrar e ver ranking final")
-        print("  3. Editar Pontos")
-        print("  4. Lançar Maldição")
-        
-        option = input("\nEscolha uma opção: ")
-        
-        if option == '1':
-            number = int(input("Digite o número da equipe: "))
-            if 1 <= number <= len(teams):
-                points = int(input("Quantos pontos?: "))
-                teams[number - 1]['pontos'] += points
-                save_teams(teams)
-                print(f"Pontos adicionados com sucesso!")
-            else:
-                print("Equipe inválida!")
-        
-        elif option == '2':
-            clear()
-            print("=== RANKING FINAL ===")
-            ranking = sorted(teams, key=lambda x: x['pontos'], reverse=True)
-            for i, team in enumerate(ranking, start=1):
-                print(f"  {i}. {team['nome']} - {team['pontos']} pontos")
-            break
-        elif option == '3':
-            print("=== EDITANDO PONTOS ===")
-            edit_points(teams)
-        elif option == '4':
-            print("\nHora de lançar maldições!")
-            launch_challenge(teams)
-        else:
-            print("\nOpção inválida")
+def get_team_names():
+    teams = load_teams()
+    return [t['nome'] for t in teams] if teams else ["Nenhuma equipe"]
 
-def edit_points(teams):
-    clear()
-    print("=== EDITANDO PONTOS ===")
-    for i, team in enumerate(teams, start=1):
-        print(f"  {i}. {team['nome']} - {team['pontos']} pontos")
-    
-    while True:
+def open_admin():
+    teams = load_teams()
+
+    admin = ctk.CTkToplevel(app)
+    admin.title("Painel do Admin")
+    admin.geometry("600x800")
+    admin.configure(fg_color="#e6e6e6")
+
+    scroll = ctk.CTkScrollableFrame(admin, fg_color="#e6e6e6")
+    scroll.pack(fill="both", expand=True, padx=20, pady=20)
+
+    #Título----------------------------------------
+    ctk.CTkLabel(
+        scroll, text="ADMIN",
+        font=("Press Start 2P", 22),
+        text_color="#ff0000"
+    ).pack(pady=(20, 30))
+
+    #Registrar Equipe----------------------------
+    ctk.CTkLabel(scroll, text="REGISTRAR EQUIPE",
+        font=("Press Start 2P", 11), text_color="#ff0000"
+    ).pack(anchor="w", pady=(0, 6))
+
+    team_entry = ctk.CTkEntry(
+        scroll, placeholder_text="Nome da equipe",
+        height=40, corner_radius=0,
+        fg_color="white", border_color="#ff0000",
+        text_color="#000000", font=("Press Start 2P", 11)
+    )
+    team_entry.pack(fill="x", pady=(0, 6))
+
+    def register_team():
+        name = team_entry.get().strip()
+        if not name:
+            messagebox.showwarning("Atenção", "Digite um nome!")
+            return
+        teams = load_teams()
+        teams.append(create_teams(name))
+        save_teams(teams)
+        team_entry.delete(0, "end")
+        refresh_dropdowns()
+        messagebox.showinfo("✅", f"Equipe '{name}' registrada!")
+
+    ctk.CTkButton(
+        scroll, text="Registrar",
+        command=register_team,
+        font=("Press Start 2P", 11),
+        height=40, corner_radius=0,
+        fg_color="transparent", border_width=2,
+        border_color="#ff0000", text_color="#ff0000",
+        hover_color="#ffcccc"
+    ).pack(fill="x", pady=(0, 25))
+
+    #Adicionar Pontos-------------------------------
+    ctk.CTkLabel(scroll, text="ADICIONAR PONTOS",
+        font=("Press Start 2P", 11), text_color="#ff0000"
+    ).pack(anchor="w", pady=(0, 6))
+
+    add_team_var = ctk.StringVar(value="Selecione...")
+    add_team_menu = ctk.CTkOptionMenu(
+        scroll, variable=add_team_var,
+        values=get_team_names(),
+        font=("Press Start 2P", 10),
+        fg_color="white", button_color="#ff0000",
+        button_hover_color="#cc0000", text_color="#000000",
+        dropdown_fg_color="white", dropdown_text_color="#000000",
+        corner_radius=0, height=40
+    )
+    add_team_menu.pack(fill="x", pady=(0, 6))
+
+    add_points_entry = ctk.CTkEntry(
+        scroll, placeholder_text="Pontos a adicionar",
+        height=40, corner_radius=0,
+        fg_color="white", border_color="#ff0000",
+        text_color="#000000", font=("Press Start 2P", 11)
+    )
+    add_points_entry.pack(fill="x", pady=(0, 6))
+
+    def add_points_gui():
+        teams = load_teams()
+        name = add_team_var.get()
         try:
-            number = int(input("\nDigite o número da equipe: "))
-            break
+            pts = int(add_points_entry.get())
         except ValueError:
-            continue
-    if 1 <= number <= len(teams):
-        while True:
-            try: 
-                newPoints = int(input("Digite a nova pontuação da equipe: "))
-                teams[number - 1]['pontos'] = newPoints
+            messagebox.showwarning("Atenção", "Digite um número válido!")
+            return
+        for team in teams:
+            if team['nome'] == name:
+                team['pontos'] += pts
                 save_teams(teams)
-                print("Pontos alterados com sucesso!")
-                break
-            except ValueError:
-                print ("Digite um número por favor")
-                continue
-    else:
-        print("Equipe inválida!")
+                add_points_entry.delete(0, "end")
+                messagebox.showinfo("✅", f"+{pts} pontos para {name}!")
+                return
+        messagebox.showwarning("Atenção", "Selecione uma equipe válida!")
 
-def launch_challenge(teams):
-    clear()
-    print("\nQual equipe você gostaria de amaldiçoar?\n")
-    for i, team in enumerate(teams, start=1):
-        print(f"  {i}. {team['nome']} - {team['pontos']} pontos")
-    
-    number = int(input("\nDigite o número da equipe: "))
-    if 1 <= number <= len(teams):
-        curse = input("Digite a maldição: ")
-        print(f"A equipe {teams[number - 1]['nome']} foi amaldiçoada a: {curse}")
-    
-    print("A maldição foi concluída? (S/N): ")
-    curseAnswear = input("Digite sua resposta: ")
+    ctk.CTkButton(
+        scroll, text="Adicionar",
+        command=add_points_gui,
+        font=("Press Start 2P", 11),
+        height=40, corner_radius=0,
+        fg_color="transparent", border_width=2,
+        border_color="#ff0000", text_color="#ff0000",
+        hover_color="#ffcccc"
+    ).pack(fill="x", pady=(0, 25))
 
-    if curseAnswear == 'S' or curseAnswear == 's':
-        add_points(teams)
-    else:
-        print("Equipe penalizada!")
+    #Editar Pontos-------------------------------------------
+    ctk.CTkLabel(scroll, text="EDITAR PONTOS",
+        font=("Press Start 2P", 11), text_color="#ff0000"
+    ).pack(anchor="w", pady=(0, 6))
+
+    edit_team_var = ctk.StringVar(value="Selecione...")
+    edit_team_menu = ctk.CTkOptionMenu(
+        scroll, variable=edit_team_var,
+        values=get_team_names(),
+        font=("Press Start 2P", 10),
+        fg_color="white", button_color="#ff0000",
+        button_hover_color="#cc0000", text_color="#000000",
+        dropdown_fg_color="white", dropdown_text_color="#000000",
+        corner_radius=0, height=40
+    )
+    edit_team_menu.pack(fill="x", pady=(0, 6))
+
+    edit_points_entry = ctk.CTkEntry(
+        scroll, placeholder_text="Nova pontuação",
+        height=40, corner_radius=0,
+        fg_color="white", border_color="#ff0000",
+        text_color="#000000", font=("Press Start 2P", 11)
+    )
+    edit_points_entry.pack(fill="x", pady=(0, 6))
+
+    def edit_points_gui():
+        teams = load_teams()
+        name = edit_team_var.get()
+        try:
+            pts = int(edit_points_entry.get())
+        except ValueError:
+            messagebox.showwarning("Atenção", "Digite um número válido!")
+            return
+        for team in teams:
+            if team['nome'] == name:
+                team['pontos'] = pts
+                save_teams(teams)
+                edit_points_entry.delete(0, "end")
+                messagebox.showinfo("✅", f"Pontuação de {name} alterada para {pts}!")
+                return
+        messagebox.showwarning("Atenção", "Selecione uma equipe válida!")
+
+    ctk.CTkButton(
+        scroll, text="Salvar",
+        command=edit_points_gui,
+        font=("Press Start 2P", 11),
+        height=40, corner_radius=0,
+        fg_color="transparent", border_width=2,
+        border_color="#ff0000", text_color="#ff0000",
+        hover_color="#ffcccc"
+    ).pack(fill="x", pady=(0, 25))
+
+    #Maldição-------------------------------------------------
+    ctk.CTkLabel(scroll, text="LANÇAR MALDICAO",
+        font=("Press Start 2P", 11), text_color="#ff0000"
+    ).pack(anchor="w", pady=(0, 6))
+
+    curse_team_var = ctk.StringVar(value="Selecione...")
+    curse_team_menu = ctk.CTkOptionMenu(
+        scroll, variable=curse_team_var,
+        values=get_team_names(),
+        font=("Press Start 2P", 10),
+        fg_color="white", button_color="#ff0000",
+        button_hover_color="#cc0000", text_color="#000000",
+        dropdown_fg_color="white", dropdown_text_color="#000000",
+        corner_radius=0, height=40
+    )
+    curse_team_menu.pack(fill="x", pady=(0, 6))
+
+    curse_entry = ctk.CTkEntry(
+        scroll, placeholder_text="A maldição...",
+        height=40, corner_radius=0,
+        fg_color="white", border_color="#ff0000",
+        text_color="#000000", font=("Press Start 2P", 11)
+    )
+    curse_entry.pack(fill="x", pady=(0, 6))
+
+    curse_label = ctk.CTkLabel(scroll, text="", text_color="#ff0000",
+        font=("Press Start 2P", 10), wraplength=500)
+    curse_label.pack(pady=(0, 6))
+
+    def launch_curse():
+        name = curse_team_var.get()
+        curse = curse_entry.get().strip()
+        if not curse or name == "Selecione...":
+            messagebox.showwarning("Atenção", "Selecione uma equipe e escreva a maldição!")
+            return
+        curse_label.configure(text=f"{name} foram amaldicoados a:\n{curse}")
+
+    ctk.CTkButton(
+        scroll, text="Lançar Maldicao!",
+        command=launch_curse,
+        font=("Press Start 2P", 11),
+        height=40, corner_radius=0,
+        fg_color="#ff0000", text_color="white",
+        hover_color="#cc0000"
+    ).pack(fill="x", pady=(0, 10))
+
+    curse_points_entry = ctk.CTkEntry(
+        scroll, placeholder_text="Pontos se cumprir",
+        height=40, corner_radius=0,
+        fg_color="white", border_color="#ff0000",
+        text_color="#000000", font=("Press Start 2P", 11)
+    )
+    curse_points_entry.pack(fill="x", pady=(0, 6))
+
+    def curse_completed():
+        teams = load_teams()
+        name = curse_team_var.get()
+        try:
+            pts = int(curse_points_entry.get())
+        except ValueError:
+            messagebox.showwarning("Atenção", "Digite os pontos ganhos!")
+            return
+        for team in teams:
+            if team['nome'] == name:
+                team['pontos'] += pts
+                save_teams(teams)
+                curse_points_entry.delete(0, "end")
+                curse_label.configure(text="")
+                messagebox.showinfo("✅", f"{name} cumpriu e ganhou {pts} pontos!")
+                return
+
+    ctk.CTkButton(
+        scroll, text="Equipe Cumpriu!",
+        command=curse_completed,
+        font=("Press Start 2P", 11),
+        height=40, corner_radius=0,
+        fg_color="transparent", border_width=2,
+        border_color="#ff0000", text_color="#ff0000",
+        hover_color="#ffcccc"
+    ).pack(fill="x", pady=(0, 30))
+
+    def refresh_dropdowns():
+        names = get_team_names()
+        add_team_menu.configure(values=names)
+        edit_team_menu.configure(values=names)
+        curse_team_menu.configure(values=names)
 
 #Criação da Interface------------------------------------------------------------------
 
-from ctypes import windll
 windll.gdi32.AddFontResourceW("PressStart2P-Regular.ttf")
 
-ctk.set_appearance_mode("dark")
+ctk.set_appearance_mode("light")
 ctk.set_default_color_theme("blue")
 
 app = ctk.CTk()
 app.title("Ignis")
-app.geometry("400x400")
+app.geometry("400x500")
 app.configure(fg_color="#e6e6e6")
 
-# Título
 logo_image = ctk.CTkImage(
     light_image=Image.open("img/pngLogo.png"),
     dark_image=Image.open("img/pngLogo.png"),
-    size=(400, 200)  # ajusta o tamanho como quiser
+    size=(400, 200)
 )
-ctk.CTkLabel(
-    app,
-    image=logo_image,
-    text=""
-).pack(pady=(40, 10))
-ctk.CTkLabel(
-    app,
-    text="GameJam Management",
-    font=("Press Start 2P", 20),
-    text_color="#ff0000"
-).pack(pady=(20, 5))
+ctk.CTkLabel(app, image=logo_image, text="").pack(pady=(40, 10))
 
-
-# Botões
-ctk.CTkButton(
-    app,
-    text="Painel do Admin",
+ctk.CTkLabel(
+    app, text="GameJam Management",
     font=("Press Start 2P", 14),
-    height=50,
-    width=300,
-    fg_color="transparent",
-    border_width=2,
-    border_color="#ff0000",
-    text_color="#ff0000",
-    hover_color="#ffcccc",
-    corner_radius=0
+    text_color="#ff0000"
+).pack(pady=(10, 20))
+
+ctk.CTkButton(
+    app, text="Painel do Admin",
+    command=open_admin,
+    font=("Press Start 2P", 12),
+    height=50, width=300,
+    fg_color="transparent", border_width=2,
+    border_color="#ff0000", text_color="#ff0000",
+    hover_color="#ffcccc", corner_radius=0
 ).pack(pady=8)
 
 ctk.CTkButton(
-    app,
-    text="Painel do Ranking",
-    font=("Press Start 2P", 14),
-    height=50,
-    width=300,
-    fg_color="transparent",
-    border_width=2,
-    border_color="#ff0000",
-    text_color="#ff0000",
-    hover_color="#ffcccc",
-    corner_radius=0
+    app, text="Painel do Ranking",
+    font=("Press Start 2P", 12),
+    height=50, width=300,
+    fg_color="transparent", border_width=2,
+    border_color="#ff0000", text_color="#ff0000",
+    hover_color="#ffcccc", corner_radius=0
 ).pack(pady=8)
 
 app.mainloop()
