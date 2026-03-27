@@ -138,7 +138,7 @@ ctk.CTkLabel(
 ).pack(pady=(40, 10))
 ctk.CTkLabel(
     app,
-    text="GameJam Manegment",
+    text="GameJam Management",
     font=("Press Start 2P", 20),
     text_color="#ff0000"
 ).pack(pady=(20, 5))
