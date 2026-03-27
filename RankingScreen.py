@@ -5,6 +5,7 @@ from tkinter import messagebox
 from tkinter import font as tkfont
 import tkinter as tk
 
+
 TeamsHistory = "teams.json"
 
 #Funções utilizadas no código-----------------------------------------------
@@ -121,14 +122,15 @@ ctk.set_default_color_theme("blue")
 app = ctk.CTk()
 app.title("Ignis")
 app.geometry("400x400")
+app.configure(fg_color="#e6e6e6")
 
 # Título
 ctk.CTkLabel(
     app,
     text="IGNIS",
-    font=("Press Start 2P", 32)
+    font=("Press Start 2P", 32),
+    text_color="#ff0000"
 ).pack(pady=(60, 5))
-
 ctk.CTkLabel(
     app,
     text="FORJA",
