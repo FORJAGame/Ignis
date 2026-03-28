@@ -296,10 +296,10 @@ def open_ranking():
     ranking_frame = ctk.CTkFrame(ranking_win, fg_color="#e6e6e6")
     ranking_frame.pack(fill="both", expand=True)
 
-    # Frame da maldição (começa escondido)
+    # Frame da maldição 
     curse_frame = ctk.CTkFrame(ranking_win, fg_color="#e6e6e6")
 
-    # ── TELA DO RANKING ──────────────────────
+    #Tela de ranking-----------------------------------------------------------
     ctk.CTkLabel(
         ranking_frame, text="RANKING",
         font=("Press Start 2P", 24),
@@ -343,7 +343,7 @@ def open_ranking():
                 text_color="#ff0000", width=100
             ).pack(side="right", padx=10, pady=12)
 
-    # ── TELA DA MALDIÇÃO ─────────────────────
+    #Tela de maldição--------------------------------------------------------
     ctk.CTkLabel(
         curse_frame, text="💀 MALDICAO!",
         font=("Press Start 2P", 22),
@@ -379,7 +379,7 @@ def open_ranking():
         update_ranking()
         clear_curse()
 
-    # ── LOOP DE VERIFICAÇÃO ──────────────────
+    #Loop de verificação------------------------------------------------------------------
     last_curse = {"text": ""}
 
     def check_curse():
