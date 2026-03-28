@@ -6,6 +6,7 @@ from PIL import Image
 from ctypes import windll
 
 TeamsHistory = "teams.json"
+CurseFile = "curse.json"
 
 #Funções utilizadas no código-----------------------------------------------
 
@@ -29,6 +30,21 @@ def get_team_names():
     teams = load_teams()
     return [t['nome'] for t in teams] if teams else ["Nenhuma equipe"]
 
+def save_curse(team_name, curse_text):
+    with open(CurseFile, "w") as f:
+        json.dump({"equipe": team_name, "maldicao": curse_text, "ativo": True}, f)
+
+def load_curse():
+    if os.path.exists(CurseFile):
+        with open(CurseFile, "r") as f:
+            return json.load(f)
+    return None
+
+def clear_curse():
+    if os.path.exists(CurseFile):
+        with open(CurseFile, "w") as f:
+            json.dump({"ativo": False}, f)
+
 def open_admin():
     teams = load_teams()
 
@@ -40,14 +56,12 @@ def open_admin():
     scroll = ctk.CTkScrollableFrame(admin, fg_color="#e6e6e6")
     scroll.pack(fill="both", expand=True, padx=20, pady=20)
 
-    #Título----------------------------------------
     ctk.CTkLabel(
         scroll, text="ADMIN",
         font=("Press Start 2P", 22),
         text_color="#ff0000"
     ).pack(pady=(20, 30))
 
-    #Registrar Equipe----------------------------
     ctk.CTkLabel(scroll, text="REGISTRAR EQUIPE",
         font=("Press Start 2P", 11), text_color="#ff0000"
     ).pack(anchor="w", pady=(0, 6))
@@ -82,7 +96,6 @@ def open_admin():
         hover_color="#ffcccc"
     ).pack(fill="x", pady=(0, 25))
 
-    #Adicionar Pontos-------------------------------
     ctk.CTkLabel(scroll, text="ADICIONAR PONTOS",
         font=("Press Start 2P", 11), text_color="#ff0000"
     ).pack(anchor="w", pady=(0, 6))
@@ -134,7 +147,6 @@ def open_admin():
         hover_color="#ffcccc"
     ).pack(fill="x", pady=(0, 25))
 
-    #Editar Pontos-------------------------------------------
     ctk.CTkLabel(scroll, text="EDITAR PONTOS",
         font=("Press Start 2P", 11), text_color="#ff0000"
     ).pack(anchor="w", pady=(0, 6))
@@ -186,7 +198,6 @@ def open_admin():
         hover_color="#ffcccc"
     ).pack(fill="x", pady=(0, 25))
 
-    #Maldição-------------------------------------------------
     ctk.CTkLabel(scroll, text="LANÇAR MALDICAO",
         font=("Press Start 2P", 11), text_color="#ff0000"
     ).pack(anchor="w", pady=(0, 6))
@@ -221,7 +232,8 @@ def open_admin():
         if not curse or name == "Selecione...":
             messagebox.showwarning("Atenção", "Selecione uma equipe e escreva a maldição!")
             return
-        curse_label.configure(text=f"{name} foram amaldicoados a:\n{curse}")
+        save_curse(name, curse)
+        curse_label.configure(text=f"{name} foram amaldicados a:\n{curse}")
 
     ctk.CTkButton(
         scroll, text="Lançar Maldicao!",
@@ -254,6 +266,7 @@ def open_admin():
                 save_teams(teams)
                 curse_points_entry.delete(0, "end")
                 curse_label.configure(text="")
+                clear_curse()
                 messagebox.showinfo("✅", f"{name} cumpriu e ganhou {pts} pontos!")
                 return
 
@@ -272,6 +285,113 @@ def open_admin():
         add_team_menu.configure(values=names)
         edit_team_menu.configure(values=names)
         curse_team_menu.configure(values=names)
+
+def open_ranking():
+    ranking_win = ctk.CTkToplevel(app)
+    ranking_win.title("Ranking")
+    ranking_win.geometry("600x700")
+    ranking_win.configure(fg_color="#e6e6e6")
+
+    # Frame do ranking
+    ranking_frame = ctk.CTkFrame(ranking_win, fg_color="#e6e6e6")
+    ranking_frame.pack(fill="both", expand=True)
+
+    # Frame da maldição (começa escondido)
+    curse_frame = ctk.CTkFrame(ranking_win, fg_color="#e6e6e6")
+
+    # ── TELA DO RANKING ──────────────────────
+    ctk.CTkLabel(
+        ranking_frame, text="RANKING",
+        font=("Press Start 2P", 24),
+        text_color="#ff0000"
+    ).pack(pady=(30, 20))
+
+    teams_container = ctk.CTkFrame(ranking_frame, fg_color="#e6e6e6")
+    teams_container.pack(fill="both", expand=True, padx=30)
+
+    def update_ranking():
+        for widget in teams_container.winfo_children():
+            widget.destroy()
+        teams = load_teams()
+        if not teams:
+            ctk.CTkLabel(
+                teams_container,
+                text="Nenhuma equipe\nregistrada.",
+                font=("Press Start 2P", 12),
+                text_color="#ff0000"
+            ).pack(pady=40)
+            return
+        ranking = sorted(teams, key=lambda x: x['pontos'], reverse=True)
+        medals = ["1ST", "2ND", "3RD"]
+        for i, team in enumerate(ranking):
+            position = medals[i] if i < 3 else f"{i+1}TH"
+            row = ctk.CTkFrame(teams_container, fg_color="white", corner_radius=0)
+            row.pack(fill="x", pady=4)
+            ctk.CTkLabel(
+                row, text=position,
+                font=("Press Start 2P", 12),
+                text_color="#ff0000", width=60
+            ).pack(side="left", padx=10, pady=12)
+            ctk.CTkLabel(
+                row, text=team['nome'],
+                font=("Press Start 2P", 12),
+                text_color="#000000", anchor="w"
+            ).pack(side="left", padx=10, pady=12, fill="x", expand=True)
+            ctk.CTkLabel(
+                row, text=f"{team['pontos']} PTS",
+                font=("Press Start 2P", 12),
+                text_color="#ff0000", width=100
+            ).pack(side="right", padx=10, pady=12)
+
+    # ── TELA DA MALDIÇÃO ─────────────────────
+    ctk.CTkLabel(
+        curse_frame, text="💀 MALDICAO!",
+        font=("Press Start 2P", 22),
+        text_color="#ff0000"
+    ).pack(pady=(80, 40))
+
+    curse_team_label = ctk.CTkLabel(
+        curse_frame, text="",
+        font=("Press Start 2P", 16),
+        text_color="#000000",
+        wraplength=500
+    )
+    curse_team_label.pack(pady=(0, 20))
+
+    curse_text_label = ctk.CTkLabel(
+        curse_frame, text="",
+        font=("Press Start 2P", 13),
+        text_color="#ff0000",
+        wraplength=500
+    )
+    curse_text_label.pack(pady=(0, 20))
+
+    def show_curse(team_name, curse_text):
+        curse_team_label.configure(text=f"O grupo {team_name}")
+        curse_text_label.configure(text=f"foi amaldicado a:\n{curse_text}")
+        ranking_frame.pack_forget()
+        curse_frame.pack(fill="both", expand=True)
+        ranking_win.after(15000, hide_curse)
+
+    def hide_curse():
+        curse_frame.pack_forget()
+        ranking_frame.pack(fill="both", expand=True)
+        update_ranking()
+        clear_curse()
+
+    # ── LOOP DE VERIFICAÇÃO ──────────────────
+    last_curse = {"text": ""}
+
+    def check_curse():
+        curse = load_curse()
+        if curse and curse.get("ativo") and curse.get("maldicao") != last_curse["text"]:
+            last_curse["text"] = curse.get("maldicao")
+            show_curse(curse["equipe"], curse["maldicao"])
+        update_ranking()
+        ranking_win.after(3000, check_curse)
+
+    update_ranking()
+    check_curse()
 
 #Criação da Interface------------------------------------------------------------------
 
@@ -310,6 +430,7 @@ ctk.CTkButton(
 
 ctk.CTkButton(
     app, text="Painel do Ranking",
+    command=open_ranking,
     font=("Press Start 2P", 12),
     height=50, width=300,
     fg_color="transparent", border_width=2,
