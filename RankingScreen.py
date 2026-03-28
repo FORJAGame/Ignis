@@ -371,7 +371,7 @@ def open_ranking():
         curse_text_label.configure(text=f"foi amaldicado a:\n{curse_text}")
         ranking_frame.pack_forget()
         curse_frame.pack(fill="both", expand=True)
-        ranking_win.after(15000, hide_curse)
+        ranking_win.after(10000, hide_curse)
 
     def hide_curse():
         curse_frame.pack_forget()
