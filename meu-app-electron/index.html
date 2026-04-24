@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Game Jam</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=DM+Mono&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #f5f4f0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      gap: 16px;
+    }
+
+    .logo {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #111;
+      letter-spacing: -1px;
+      margin-bottom: 8px;
+    }
+
+    .logo span {
+      color: #e84545;
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+      color: #888;
+      margin-bottom: 24px;
+    }
+
+    button {
+      width: 260px;
+      padding: 14px 20px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      border: 2px solid #111;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    button:hover { transform: translateY(-2px); box-shadow: 4px 4px 0 #111; }
+    button:active { transform: translateY(0); box-shadow: none; }
+
+    #btn-admin { background: #111; color: #fff; }
+    #btn-publico { background: #f5f4f0; color: #111; }
+  </style>
+</head>
+<body>
+  <div class="logo">Ignis</div>
+  <div class="subtitle">Sistema de pontuação</div>
+  <button id="btn-admin">🔒 Painel do Administrador</button>
+  <button id="btn-publico">🌐 Painel Público</button>
+
+  <script>
+    document.getElementById('btn-admin').addEventListener('click', () => {
+      window.electronAPI.abrirJanela('admin')
+    })
+    document.getElementById('btn-publico').addEventListener('click', () => {
+      window.electronAPI.abrirJanela('publico')
+    })
+  </script>
+</body>
+</html>

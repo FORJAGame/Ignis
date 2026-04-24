@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Painel Público</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=DM+Mono:wght@400;700&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #f5f4f0;
+      color: #111;
+      min-height: 100vh;
+      padding: 32px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+
+    .logo { font-size: 1.6rem; font-weight: 700; letter-spacing: -1px; }
+    .logo span { color: #e84545; }
+
+    .live-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #2ecc71;
+    }
+
+    .live-dot {
+      width: 8px; height: 8px;
+      background: #2ecc71;
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      letter-spacing: -0.3px;
+      color: #444;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+    }
+
+    /* RANKING */
+    .ranking-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: #fff;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 10px;
+      transition: transform 0.2s;
+    }
+
+    .ranking-item:first-child {
+      border-color: #e84545;
+      background: #fff5f5;
+    }
+
+    .rank-pos {
+      font-family: 'DM Mono', monospace;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #ccc;
+      min-width: 28px;
+    }
+
+    .ranking-item:first-child .rank-pos { color: #e84545; }
+
+    .rank-nome {
+      flex: 1;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .rank-pontos {
+      font-family: 'DM Mono', monospace;
+      font-weight: 700;
+      font-size: 1.3rem;
+      color: #111;
+    }
+
+    /* MALDIÇÕES */
+    .maldicao-card {
+      background: #fff;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 10px;
+    }
+
+    .maldicao-titulo {
+      font-weight: 700;
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .maldicao-badge {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #e84545;
+      background: #fff5f5;
+      border: 1px solid #e84545;
+      border-radius: 6px;
+      padding: 2px 8px;
+    }
+
+    .maldicao-desc { font-size: 0.85rem; color: #666; }
+
+    .empty { color: #aaa; font-size: 0.9rem; padding: 12px 0; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">Game<span>Jam</span></div>
+    <div class="live-badge"><div class="live-dot"></div> AO VIVO</div>
+  </header>
+
+  <div class="grid">
+    <div>
+      <h2>🏆 Ranking</h2>
+      <div id="ranking"></div>
+    </div>
+    <div>
+      <h2>⚡ Maldições Ativas</h2>
+      <div id="maldicoes"></div>
+    </div>
+  </div>
+
+  <script>
+    function renderDados(dados) {
+      // Ranking
+      const ranking = document.getElementById('ranking')
+      if (!dados.equipes.length) {
+        ranking.innerHTML = '<div class="empty">Nenhuma equipe ainda.</div>'
+      } else {
+        const sorted = [...dados.equipes].sort((a, b) => b.pontos - a.pontos)
+        ranking.innerHTML = sorted.map((e, i) => `
+          <div class="ranking-item">
+            <div class="rank-pos">#${i + 1}</div>
+            <div class="rank-nome">${e.nome}</div>
+            <div class="rank-pontos">${e.pontos} pts</div>
+          </div>
+        `).join('')
+      }
+
+      // Maldições
+      const maldicoes = document.getElementById('maldicoes')
+      if (!dados.maldicoes.length) {
+        maldicoes.innerHTML = '<div class="empty">Nenhuma maldição ativa.</div>'
+      } else {
+        maldicoes.innerHTML = dados.maldicoes.map(m => `
+          <div class="maldicao-card">
+            <div class="maldicao-titulo">
+              ⚡ ${m.titulo}
+              <span class="maldicao-badge">+${m.pontos} pts</span>
+            </div>
+            <div class="maldicao-desc">${m.descricao || 'Sem descrição'}</div>
+          </div>
+        `).join('')
+      }
+    }
+
+    // Carrega dados iniciais
+    window.electronAPI.getDados().then(renderDados)
+
+    // Atualiza em tempo real quando admin faz mudanças
+    window.electronAPI.onDadosAtualizados(renderDados)
+  </script>
+</body>
+</html>

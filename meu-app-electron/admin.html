@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Administrador</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=DM+Mono&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #f5f4f0;
+      color: #111;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 180px;
+      background: #111;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      padding: 24px 0;
+      flex-shrink: 0;
+    }
+
+    .sidebar-title {
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 0 20px 20px;
+      border-bottom: 1px solid #333;
+      letter-spacing: -0.5px;
+    }
+
+    .nav-item {
+      padding: 12px 20px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: #aaa;
+      transition: all 0.15s;
+      border-left: 3px solid transparent;
+    }
+
+    .nav-item:hover { color: #fff; background: #1e1e1e; }
+    .nav-item.active { color: #fff; border-left-color: #e84545; background: #1e1e1e; }
+
+    /* MAIN */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 28px;
+    }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      letter-spacing: -0.5px;
+    }
+
+    /* CARDS */
+    .card {
+      background: #fff;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 18px;
+      margin-bottom: 12px;
+    }
+
+    /* FORM */
+    .form-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    input, select {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      padding: 10px 14px;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      background: #fff;
+      color: #111;
+      outline: none;
+      transition: border 0.15s;
+    }
+
+    input:focus, select:focus { border-color: #111; }
+    input[type="number"] { width: 100px; }
+    input[type="text"] { flex: 1; }
+    textarea {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      padding: 10px 14px;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      width: 100%;
+      resize: vertical;
+      outline: none;
+    }
+    textarea:focus { border-color: #111; }
+
+    /* BUTTONS */
+    .btn {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 9px 16px;
+      border-radius: 7px;
+      border: 1.5px solid #111;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn:hover { transform: translateY(-1px); box-shadow: 2px 2px 0 #111; }
+    .btn:active { transform: none; box-shadow: none; }
+    .btn-primary { background: #111; color: #fff; }
+    .btn-danger { background: #fff; color: #e84545; border-color: #e84545; }
+    .btn-danger:hover { box-shadow: 2px 2px 0 #e84545; }
+    .btn-success { background: #2ecc71; color: #fff; border-color: #2ecc71; }
+    .btn-sm { padding: 6px 10px; font-size: 0.8rem; }
+
+    /* EQUIPE CARD */
+    .equipe-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #fff;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 10px;
+    }
+
+    .equipe-nome { font-weight: 700; font-size: 1rem; }
+    .equipe-pontos {
+      font-family: 'DM Mono', monospace;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #e84545;
+      min-width: 60px;
+      text-align: center;
+    }
+
+    .equipe-acoes { display: flex; gap: 6px; align-items: center; }
+
+    /* MALDICAO CARD */
+    .maldicao-card {
+      background: #fff;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .maldicao-info { flex: 1; }
+    .maldicao-titulo { font-weight: 700; margin-bottom: 4px; }
+    .maldicao-desc { font-size: 0.85rem; color: #666; }
+    .maldicao-pontos {
+      font-family: 'DM Mono', monospace;
+      font-weight: 700;
+      color: #e84545;
+      font-size: 0.95rem;
+      white-space: nowrap;
+    }
+
+    /* CUMPRIR */
+    .cumprir-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .msg { font-size: 0.85rem; color: #2ecc71; margin-top: 6px; font-weight: 600; }
+    .msg.erro { color: #e84545; }
+
+    .empty { color: #aaa; font-size: 0.9rem; padding: 12px 0; }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="sidebar-title">🔒 Admin</div>
+    <div class="nav-item active" data-section="equipes">👥 Equipes</div>
+    <div class="nav-item" data-section="maldicoes">⚡ Maldições</div>
+    <div class="nav-item" data-section="cumprir">✅ Cumprir</div>
+  </div>
+
+  <div class="main">
+
+    <!-- EQUIPES -->
+    <div class="section active" id="section-equipes">
+      <h2>👥 Equipes</h2>
+      <div class="card">
+        <div class="form-row">
+          <input type="text" id="input-equipe" placeholder="Nome da equipe..." />
+          <button class="btn btn-primary" onclick="adicionarEquipe()">+ Adicionar</button>
+        </div>
+        <div id="msg-equipe" class="msg" style="display:none"></div>
+      </div>
+      <div id="lista-equipes"></div>
+    </div>
+
+    <!-- MALDIÇÕES -->
+    <div class="section" id="section-maldicoes">
+      <h2>⚡ Maldições</h2>
+      <div class="card">
+        <div class="form-row">
+          <input type="text" id="input-maldicao-titulo" placeholder="Título da maldição..." />
+          <input type="number" id="input-maldicao-pontos" placeholder="Pontos" min="0" value="10" />
+        </div>
+        <textarea id="input-maldicao-desc" rows="2" placeholder="Descrição da maldição..." style="margin-bottom:10px"></textarea>
+        <button class="btn btn-primary" onclick="adicionarMaldicao()">⚡ Lançar Maldição</button>
+        <div id="msg-maldicao" class="msg" style="display:none"></div>
+      </div>
+      <div id="lista-maldicoes"></div>
+    </div>
+
+    <!-- CUMPRIR MALDIÇÃO -->
+    <div class="section" id="section-cumprir">
+      <h2>✅ Cumprir Maldição</h2>
+      <div class="card">
+        <p style="font-size:0.9rem;color:#666;margin-bottom:14px">Selecione a equipe e a maldição que foi cumprida para conceder os pontos.</p>
+        <div class="form-row">
+          <select id="select-equipe-cumprir" style="flex:1">
+            <option value="">Selecione a equipe...</option>
+          </select>
+          <select id="select-maldicao-cumprir" style="flex:1">
+            <option value="">Selecione a maldição...</option>
+          </select>
+        </div>
+        <button class="btn btn-success" onclick="cumprirMaldicao()">✅ Conceder Pontos</button>
+        <div id="msg-cumprir" class="msg" style="display:none"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    let dados = { equipes: [], maldicoes: [] }
+
+    // Navegação
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', () => {
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'))
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'))
+        item.classList.add('active')
+        document.getElementById('section-' + item.dataset.section).classList.add('active')
+      })
+    })
+
+    function mostrarMsg(id, texto, erro = false) {
+      const el = document.getElementById(id)
+      el.textContent = texto
+      el.className = 'msg' + (erro ? ' erro' : '')
+      el.style.display = 'block'
+      setTimeout(() => el.style.display = 'none', 3000)
+    }
+
+    function renderEquipes() {
+      const lista = document.getElementById('lista-equipes')
+      if (!dados.equipes.length) {
+        lista.innerHTML = '<div class="empty">Nenhuma equipe cadastrada.</div>'
+        return
+      }
+      const sorted = [...dados.equipes].sort((a, b) => b.pontos - a.pontos)
+      lista.innerHTML = sorted.map(e => `
+        <div class="equipe-card">
+          <div class="equipe-nome">${e.nome}</div>
+          <div class="equipe-pontos">${e.pontos} pts</div>
+          <div class="equipe-acoes">
+            <button class="btn btn-sm btn-primary" onclick="alterarPontos(${e.id}, 1)">+1</button>
+            <button class="btn btn-sm btn-primary" onclick="alterarPontos(${e.id}, 5)">+5</button>
+            <button class="btn btn-sm btn-primary" onclick="alterarPontos(${e.id}, 10)">+10</button>
+            <button class="btn btn-sm btn-danger" onclick="alterarPontos(${e.id}, -1)">-1</button>
+            <button class="btn btn-sm btn-danger" onclick="alterarPontos(${e.id}, -5)">-5</button>
+            <button class="btn btn-sm btn-danger" onclick="removerEquipe(${e.id})">🗑</button>
+          </div>
+        </div>
+      `).join('')
+    }
+
+    function renderMaldicoes() {
+      const lista = document.getElementById('lista-maldicoes')
+      if (!dados.maldicoes.length) {
+        lista.innerHTML = '<div class="empty">Nenhuma maldição lançada.</div>'
+        return
+      }
+      lista.innerHTML = dados.maldicoes.map(m => `
+        <div class="maldicao-card">
+          <div class="maldicao-info">
+            <div class="maldicao-titulo">⚡ ${m.titulo}</div>
+            <div class="maldicao-desc">${m.descricao || 'Sem descrição'}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+            <div class="maldicao-pontos">+${m.pontos} pts</div>
+            <button class="btn btn-sm btn-danger" onclick="removerMaldicao(${m.id})">🗑 Remover</button>
+          </div>
+        </div>
+      `).join('')
+    }
+
+    function renderSelects() {
+      const se = document.getElementById('select-equipe-cumprir')
+      const sm = document.getElementById('select-maldicao-cumprir')
+      se.innerHTML = '<option value="">Selecione a equipe...</option>' +
+        dados.equipes.map(e => `<option value="${e.id}">${e.nome} (${e.pontos} pts)</option>`).join('')
+      sm.innerHTML = '<option value="">Selecione a maldição...</option>' +
+        dados.maldicoes.map(m => `<option value="${m.id}">${m.titulo} (+${m.pontos} pts)</option>`).join('')
+    }
+
+    function renderTudo() {
+      renderEquipes()
+      renderMaldicoes()
+      renderSelects()
+    }
+
+    async function adicionarEquipe() {
+      const nome = document.getElementById('input-equipe').value.trim()
+      if (!nome) return mostrarMsg('msg-equipe', 'Digite o nome da equipe!', true)
+      const res = await window.electronAPI.adicionarEquipe(nome)
+      if (res.erro) return mostrarMsg('msg-equipe', res.erro, true)
+      dados = res
+      document.getElementById('input-equipe').value = ''
+      mostrarMsg('msg-equipe', `Equipe "${nome}" adicionada!`)
+      renderTudo()
+    }
+
+    async function removerEquipe(id) {
+      dados = await window.electronAPI.removerEquipe(id)
+      renderTudo()
+    }
+
+    async function alterarPontos(id, valor) {
+      dados = await window.electronAPI.alterarPontos(id, valor)
+      renderTudo()
+    }
+
+    async function adicionarMaldicao() {
+      const titulo = document.getElementById('input-maldicao-titulo').value.trim()
+      const descricao = document.getElementById('input-maldicao-desc').value.trim()
+      const pontos = parseInt(document.getElementById('input-maldicao-pontos').value) || 0
+      if (!titulo) return mostrarMsg('msg-maldicao', 'Digite o título da maldição!', true)
+      dados = await window.electronAPI.adicionarMaldicao({ titulo, descricao, pontos })
+      document.getElementById('input-maldicao-titulo').value = ''
+      document.getElementById('input-maldicao-desc').value = ''
+      document.getElementById('input-maldicao-pontos').value = '10'
+      mostrarMsg('msg-maldicao', `Maldição "${titulo}" lançada!`)
+      renderTudo()
+    }
+
+    async function removerMaldicao(id) {
+      dados = await window.electronAPI.removerMaldicao(id)
+      renderTudo()
+    }
+
+    async function cumprirMaldicao() {
+      const equipeId = parseInt(document.getElementById('select-equipe-cumprir').value)
+      const maldicaoId = parseInt(document.getElementById('select-maldicao-cumprir').value)
+      if (!equipeId || !maldicaoId) return mostrarMsg('msg-cumprir', 'Selecione a equipe e a maldição!', true)
+      const res = await window.electronAPI.cumprirMaldicao(equipeId, maldicaoId)
+      if (res.erro) return mostrarMsg('msg-cumprir', res.erro, true)
+      dados = res
+      const eq = dados.equipes.find(e => e.id === equipeId)
+      mostrarMsg('msg-cumprir', `Pontos concedidos para ${eq?.nome}!`)
+      renderTudo()
+    }
+
+    // Inicializa
+    window.electronAPI.getDados().then(d => {
+      dados = d
+      renderTudo()
+    })
+  </script>
+</body>
+</html>
