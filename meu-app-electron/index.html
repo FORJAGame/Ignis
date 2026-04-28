@@ -10,7 +10,7 @@
 
     body {
       font-family: 'DM Sans', sans-serif;
-      background: #f5f4f0;
+      background: #e8e8e8;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -22,7 +22,7 @@
     .logo {
       font-size: 2.2rem;
       font-weight: 700;
-      color: #111;
+      color: #cd0202;
       letter-spacing: -1px;
       margin-bottom: 8px;
     }
@@ -43,7 +43,7 @@
       font-family: 'DM Sans', sans-serif;
       font-size: 1rem;
       font-weight: 600;
-      border: 2px solid #111;
+      border: 2px solid #ec0202;
       border-radius: 8px;
       cursor: pointer;
       transition: all 0.15s ease;
@@ -55,12 +55,18 @@
     button:hover { transform: translateY(-2px); box-shadow: 4px 4px 0 #111; }
     button:active { transform: translateY(0); box-shadow: none; }
 
-    #btn-admin { background: #111; color: #fff; }
+    #btn-admin { background: #df2020; color: #170e0e; }
     #btn-publico { background: #f5f4f0; color: #111; }
+
+    .logo img {
+  width: 200px;
+  height: auto;
+}
   </style>
 </head>
 <body>
-  <div class="logo">Ignis</div>
+  <div class="logo">
+  <img src="img/pngLogo.png" alt="Ignis"></div>
   <div class="subtitle">Sistema de pontuação</div>
   <button id="btn-admin">🔒 Painel do Administrador</button>
   <button id="btn-publico">🌐 Painel Público</button>
